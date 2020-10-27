@@ -179,27 +179,29 @@ data Validation e a =
 -- same as Either
 instance Functor (Validation e) where
 
-  fmap _ (Failure m) = Failure m
-  fmap f (Success n) = Success (f n)
+  fmap _ (Failure e) = Failure e
+  fmap f (Success x) = Success (f x)
 
-  -- fmap :: (x -> y) -> Validation e x -> Validation e y
-  -- f :: (x -> y)
-  -- Failure m :: Validation e x, Failure m :: Validation e y
-  -- m :: e
+  -- fmap :: (p -> q) -> Validation e p -> Validation e q
+  -- f :: (p -> q)
+  -- Failure :: e -> Validation e a
+  -- Failure e :: Validation e p
 
-  -- Success n :: Validation e x, Success n :: Validation e y
-  -- n :: x
-  -- f n :: y
+  -- Success :: a -> Validation e a
+  -- Success x :: Validation e p
+  -- x :: p
 
 instance Monoid e => Applicative (Validation e) where
-  pure x = Success x
+  pure = Success
   -- pure x :: Validation e x
   -- x :: a ; x has to correspond to the success type
 
-  (<*>) (Success fn) (Success x) = Success (fn x)
-  (<*>) (Failure fn) (Failure x) = Failure (fn <> x) -- Failure type e is Monoid
-  (<*>) (Failure fn) _ = Failure fn
-  (<*>) _ (Failure x) = Failure x
+  -- Failure :: e -> Validation e a, Success :: a -> Validation e a
+  -- <*> :: Validation e (x -> y) -> Validation e x -> Validation e y
+  (<*>) (Success f) (Success x) = Success (f x)
+  (<*>) (Failure e) (Failure e') = Failure (e <> e') -- Failure type e is Monoid
+  (<*>) (Failure e) _ = Failure e
+  (<*>) _ (Failure e) = Failure e
 
 instance (Arbitrary e, Arbitrary a) => Arbitrary (Validation e a) where
   arbitrary = oneof [Failure <$> arbitrary,
