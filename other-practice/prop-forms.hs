@@ -39,19 +39,24 @@ simplify :: Form -> Form
 simplify (f1 `And` f2) = removeConst (simplify f1 `And` simplify f2)
 simplify (f1 `Or`  f2) = removeConst (simplify f1 `Or` simplify f2)
 simplify (Not f)       = removeConst (Not (simplify f))
-simplify f             = f
+simplify (C b)         = C b
+simplify (V a)         = V a
 
 
 -- 5. Negation normal form
--- ¬ (¬ p)   = p
--- ¬ (p ∨ q) = ¬p ∧ ¬q –- De Morgan's
+-- ¬ (¬ p)   = p       -- double negation
+-- ¬ (p ∨ q) = ¬p ∧ ¬q -- De Morgan's
 -- ¬ (p ∧ q) = ¬p ∨ ¬q -- De Morgan's
 
 nnf :: Form -> Form
 nnf (Not (Not f))       = nnf f
-nnf (Not (f1 `And` f2)) = nnf (Not (nnf f1)) `Or` nnf (Not (nnf f2))
-nnf (Not (f1 `Or` f2))  = nnf (Not (nnf f1)) `And` nnf (Not (nnf f2))
-nnf f                   = f
+nnf (Not (f1 `And` f2)) = nnf (Not f1) `Or` nnf (Not f2)
+nnf (Not (f1 `Or` f2))  = nnf (Not f1) `And` nnf (Not f2)
+nnf (f1 `And` f2)       = nnf f1 `And` nnf f2
+nnf (f1 `Or` f2)        = nnf f1 `Or` nnf f2
+nnf (Not f)             = Not (nnf f)
+nnf (C b)               = C b
+nnf (V a)               = V a
 
 
 -- 6. Conjuctive normal form
