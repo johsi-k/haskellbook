@@ -1,3 +1,5 @@
+module PropForms where
+
 import Data.List
 
 -- 1. Define the data type Form
@@ -117,14 +119,21 @@ evalSubst f subs = bool
 
 
 -- 11. Enumerate all valuations
-models :: Form -> [(String, Bool)] -> [String] -> [[(String, Bool)]]
-models f vl []     | evalSubst f vl = [vl] | otherwise = []
-models f vl (v:vs) = models f ((v, True):vl) vs ++ models f ((v, False):vl) vs
+-- models :: Form -> [(String, Bool)] -> [String] -> [[(String, Bool)]]
+-- models f vl []     = [vl | evalSubst f vl]
+-- models f vl (v:vs) = models f ((v, True):vl) vs ++ models f ((v, False):vl) vs
+
+perms :: [String] -> [[(String, Bool)]]
+perms []     = [[]]
+perms (v:vs) = [(v, b) : ps | ps <- perms vs, b <- [True, False]]
 
 
 -- 12.
+-- allModels :: Form -> [[(String, Bool)]]
+-- allModels f = models f [] (fvList f)
+
 allModels :: Form -> [[(String, Bool)]]
-allModels f = models f [] (fvList f)
+allModels f = filter (evalSubst f) (perms (fvList f))
 
 
 -- 13. f is unsatisfiable if it is true for no valuation
