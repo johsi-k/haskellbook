@@ -20,9 +20,9 @@ aParser cs       = (False, cs)
 -- Let's refactor so that we can pass in the character we want to match
 -- Instead of returning True/False, we'll return a message indicating what happened
 
-pChar :: (Char, String) -> (String, String)
-pChar (_, "") = ("No more input", "")
-pChar (c', ccs@(c:cs))
+pChar' :: (Char, String) -> (String, String)
+pChar' (_, "") = ("No more input", "")
+pChar' (c', ccs@(c:cs))
   | c == c'   = ("Found " ++ [c], cs)
   | otherwise = ("Expecting '" ++ [c'] ++ "'. Got '" ++ [c] ++ "'", ccs)
 
@@ -69,8 +69,8 @@ pCharCurried' c' =
 
 data Parser a = Parser (String -> Result (a, String))
 
-pCharWrapped :: Char -> Parser Char
-pCharWrapped c' =
+pChar :: Char -> Parser Char
+pChar c' =
   let innerFn "" = Failure "No more input"
       innerFn (c:cs)
         | c == c'   = Success (c, cs)
@@ -134,9 +134,9 @@ orElse parser1 parser2 =
   in Parser innerFn
 
 instance Alt Result where
-  s@Success{} <!> _ = s
-  _ <!> s@Success{} = s
-  Failure _ <!> Failure n = Failure n
+  s@Success{} <!> _       = s
+  _ <!> s@Success{}       = s
+  Failure m <!> Failure n = Failure (m ++ "; " ++ n)
 
 instance Functor Parser where
   fmap :: (a -> b) -> Parser a -> Parser b
@@ -152,11 +152,12 @@ instance Applicative Parser where
 
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
   (<*>) pab pa =
-    let innerFn inp = do
-          (a, rem1) <- run pa inp
-          (f, rem2) <- run pab rem1
-          return (f a, rem2)
-    in Parser innerFn
+    -- let innerFn inp = do
+    --       (a, rem1) <- run pa inp
+    --       (f, rem2) <- run pab rem1
+    --       return (f a, rem2)
+    -- in Parser innerFn
+    fmap (\(f, x) -> f x) (pab `andThen` pa)
 
 instance Alternative Parser where
   empty :: Parser a
@@ -172,7 +173,7 @@ choice :: [Parser a] -> Parser a
 choice = foldr orElse empty
 
 anyOf :: String -> Parser Char
-anyOf = choice . fmap pCharWrapped
+anyOf = choice . fmap pChar
 
 
 inputABC :: String

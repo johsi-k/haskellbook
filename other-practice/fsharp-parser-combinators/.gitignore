@@ -1,2 +1,5 @@
-.stack-work/
 *~
+*.hi
+*.o
+.stack-work/
+stack.yaml.lock

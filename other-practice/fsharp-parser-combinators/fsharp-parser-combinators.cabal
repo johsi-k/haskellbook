@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2b6441cf2e075fd06840399458dc715a4d6445cd34012b63f253d1c557f73063
+-- hash: b9c7630264221f81b02ca39c3f8bcf393fc2d724bb56f615adeed8b869c70c40
 
 name:           fsharp-parser-combinators
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      BuildingALib
       Foundations
       Lib
   other-modules:

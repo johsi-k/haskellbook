@@ -1,1 +1,1 @@
-Parser combinator practice with https://fsharpforfunandprofit.com/posts/understanding-parser-combinators/
+Exercises from https://fsharpforfunandprofit.com/posts/understanding-parser-combinators/
